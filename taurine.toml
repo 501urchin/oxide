@@ -2,6 +2,7 @@
 name="taurine"
 directory="./"
 deploy_type="docker-file" # or "executable" or "docker-compose"
+build_command="go build -o taurine ."
 backup_old_release = true
 keep_releases = 3  
 pre_deploy_hook = "scripts/prepare.sh"
@@ -31,9 +32,9 @@ domain = "taurine.example.com"
 auto_ssl = true  # Let's Encrypt + certbot
 redirect_http = true
 
-[monitoring]
+[healthcheck]
 health_check_path = "/health"
-health_check_port = 3000
+health_status = 200
 
 [secrets]
 env_file_path="./.env"
