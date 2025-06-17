@@ -1,0 +1,40 @@
+[app]
+name="taurine"
+directory="./"
+deploy_type="docker-file" # or "executable" or "docker-compose"
+backup_old_release = true
+keep_releases = 3  
+pre_deploy_hook = "scripts/prepare.sh"
+post_deploy_hook = "scripts/cleanup.sh"
+
+[server]
+os="ubuntu"
+host = "178.168.45.32"
+port = 22
+user = "ubuntu"  
+password = "hello world"
+ssh_key = ""  # or inline it
+ssh_keyfile_location = "~/.ssh/id_rsa"
+deploy_path = "/var/www/taurine"  
+
+[firewall]
+allowed_inbound = [22, 443, 80]
+allowed_outbound = "all"
+block_ping = true
+rate_limit_ssh = true
+auto_configure_ufw = true
+
+[reverse_proxy]
+enabled = true
+type = "nginx"  # or "traefik"
+domain = "taurine.example.com"
+auto_ssl = true  # Let's Encrypt + certbot
+redirect_http = true
+
+[monitoring]
+health_check_path = "/health"
+health_check_port = 3000
+
+[secrets]
+env_file_path="./.env"
+remote_env_file_path="~/.env"
