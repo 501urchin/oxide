@@ -84,7 +84,6 @@ func TestKeyAuth(t *testing.T) {
 				t.Fatal("failed to throw err")
 			}
 
-
 			if !tt.expectError && err != nil {
 				t.Fatal(err)
 			}
@@ -115,6 +114,12 @@ func TestPasswordAutUnknownHost(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	clean, err := taurinetesting.MockStdin(tmpDir+"rozz", "yes")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer clean()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			client, err := ConnectWithPassword(taurinetesting.TestUser, "127.0.0.1:3098", taurinetesting.TestPassword, tmpFilePath)
@@ -127,7 +132,6 @@ func TestPasswordAutUnknownHost(t *testing.T) {
 				client.Close()
 				t.Fatal(err)
 			}
-
 
 			f, err := os.ReadFile(tmpFilePath)
 			if err != nil {
@@ -155,12 +159,17 @@ func TestKeyAuthUnknownHost(t *testing.T) {
 	}
 
 	tmpDir := t.TempDir()
-
 	tmpFilePath := tmpDir + "/known_hosts"
-	err := os.WriteFile(tmpFilePath, []byte(`127.0.0.1:3098 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBWiHlrQ6HS7vytwfKb32R70waRKqJ9cZOWx8RDfm4HX`), 0644)
+	err := os.WriteFile(tmpFilePath, []byte(`127.0.0.6:3098 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBWiHlrQ6HS7vytwfKb32R70waRKqJ9cZOWx8RDfm4HX`), 0644)
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	clean, err := taurinetesting.MockStdin(tmpDir+"rozz", "yes")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer clean()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -169,7 +178,6 @@ func TestKeyAuthUnknownHost(t *testing.T) {
 				client.Close()
 				t.Fatal("failed to throw err")
 			}
-
 
 			if !tt.expectError && err != nil {
 				t.Fatal(err)
@@ -190,4 +198,3 @@ func TestKeyAuthUnknownHost(t *testing.T) {
 		})
 	}
 }
-
