@@ -40,12 +40,14 @@ func StartMockSSHServer( addr string) (net.Listener, error) {
     serverConfig := &ssh.ServerConfig{
         PasswordCallback:  passwordHandler,
         PublicKeyCallback: publicKeyHandler,
+    
     }
 
     signer, err := ssh.ParsePrivateKey([]byte(PrivateKeyPEM))
     if err != nil {
         return nil, fmt.Errorf("failed to parse private key: %v", err)
     }
+
     serverConfig.AddHostKey(signer)
 
     listener, err := net.Listen("tcp", addr)

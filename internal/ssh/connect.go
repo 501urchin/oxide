@@ -1,38 +1,98 @@
 package ssh
 
 import (
+	"fmt"
+	"net"
+	"os"
+	"strings"
+
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/knownhosts"
 )
 
-func ConnectSshViaPassword(user, host string, password string) (client *ssh.Client, err error) {
-	conf := ssh.ClientConfig{
-		User: user,
-		Auth: []ssh.AuthMethod{
-			ssh.Password(password),
-		},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-	}
 
-	return ssh.Dial("tcp", host, &conf)
+func writeHostKeyToKnownHosts(knownHostsPath, host string, key ssh.PublicKey) error {
+	file, err := os.OpenFile(knownHostsPath, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(fmt.Sprintf("\n%s %s", host, ssh.MarshalAuthorizedKey(key)))
+	return err
 }
 
-func ConnectSshViakeys(user, host string, password string) (client *sshClient, err error) {
-	conf := ssh.ClientConfig{
-		User: user,
-		Auth: []ssh.AuthMethod{
-			ssh.Password(password),
-		},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+
+func getHostKeyCallback(capturedKey *ssh.PublicKey) ssh.HostKeyCallback {
+	return func(hostname string, remote net.Addr, key ssh.PublicKey) error {
+		*capturedKey = key
+		return nil
+	}
+}
+
+
+func establishInitialConnection(host, user string, authMethod ssh.AuthMethod, knownHostsPath string) (*ssh.Client, error) {
+	var hostkey ssh.PublicKey
+
+	conf := &ssh.ClientConfig{
+		User:            user,
+		Auth:            []ssh.AuthMethod{authMethod},
+		HostKeyCallback: getHostKeyCallback(&hostkey),
 	}
 
-	conn, err := ssh.Dial("tcp", host, &conf)
+	client, err := ssh.Dial("tcp", host, conf)
 	if err != nil {
 		return nil, err
 	}
+	defer client.Close()
 
-	return &sshClient{
-		user:   user,
-		host:   host,
-		client: conn,
-	}, nil
+	if err := writeHostKeyToKnownHosts(knownHostsPath, host, hostkey); err != nil {
+		return nil, fmt.Errorf("failed to save host key: %v", err)
+	}
+	return nil, nil
+}
+
+
+func connectSSH(user, host, knownHostsPath string, authMethod ssh.AuthMethod) (*ssh.Client, error) {
+	hostKeyCallback, err := knownhosts.New(knownHostsPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load known_hosts: %v", err)
+	}
+
+	conf := &ssh.ClientConfig{
+		User:            user,
+		Auth:            []ssh.AuthMethod{authMethod},
+		HostKeyCallback: hostKeyCallback,
+	}
+
+	client, err := ssh.Dial("tcp", host, conf)
+	if err != nil && strings.Contains(err.Error(), "knownhosts: key is unknown") {
+		_, err := establishInitialConnection(host, user, authMethod, knownHostsPath)
+		if err != nil {
+			return nil, err
+		}
+
+		hostKeyCallback, err = knownhosts.New(knownHostsPath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to reload known_hosts: %v", err)
+		}
+
+		conf.HostKeyCallback = hostKeyCallback
+		return ssh.Dial("tcp", host, conf)
+	}
+
+	return client, err
+}
+
+func ConnectWithPassword(user, host, password, knownHostsPath string) (*ssh.Client, error) {
+	return connectSSH(user, host, knownHostsPath, ssh.Password(password))
+}
+
+
+func ConnectWithPrivateKey(user, host string, key []byte, knownHostsPath string) (*ssh.Client, error) {
+	signer, err := ssh.ParsePrivateKey(key)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse private key: %v", err)
+	}
+	return connectSSH(user, host, knownHostsPath, ssh.PublicKeys(signer))
 }
