@@ -13,6 +13,7 @@ os = "ubuntu"
 host = "178.168.45.32"
 port = 22
 user = "ubuntu"
+known_host="./.ssh/knownhosts" 
 password = "hello world"
 ssh_key = ""                           # or inline it
 ssh_keyfile_location = "~/.ssh/id_rsa"
