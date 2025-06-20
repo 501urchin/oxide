@@ -1,42 +1,78 @@
+#############################################
+# Application Configuration
+#############################################
 [app]
-name = "taurine"
-directory = "./"
-deploy_type = "docker-file"             # or "executable" or "docker-compose"
+name = "taurine"                           # Name of your application
+source_directory = "./"                   # Where your app code resides
+deploy_type = "docker-file"               # Options: "docker-file", "docker-compose", or "executable"
+
+# Required if deploy_type = "executable"
 build_command = "go build -o taurine ."
-backup_old_release = true
-keep_releases = 3
-pre_deploy_hook = "scripts/prepare.sh"
-post_deploy_hook = "scripts/cleanup.sh"
 
+# Deployment history and safety
+keep_previous_releases = 3                # Number of past releases to retain
+backup_previous_release = true            # Backup the current release before deploying
+
+# Optional deployment hooks
+pre_deploy_script = "scripts/prepare.sh"  # Run before deploying
+post_deploy_script = "scripts/cleanup.sh" # Run after deploying
+ports = [] # the ports your app is running on, thjese will be the same ports docker will expose if you chosee docker 
+
+
+#############################################
+# Remote Server Configuration
+#############################################
 [server]
-os = "ubuntu"
-host = "178.168.45.32"
-port = 22
-user = "ubuntu"
-known_host="./.ssh/knownhosts" 
-password = "hello world"
-ssh_key = ""                           # or inline it
-ssh_keyfile_location = "~/.ssh/id_rsa"
-deploy_path = "/var/www/taurine"
+os = "ubuntu"                             # Target server OS
+host = "178.168.45.32"                    # IP or hostname of the server
+port = 22                                 # SSH port (default is 22)
+user = "ubuntu"                           # SSH login username
 
+# SSH authentication
+use_password = true                       # Set to false to use SSH keys instead
+password = "hello world"                  # Only used if use_password = true
+
+ssh_key_inline = ""                       # Optional: directly paste your SSH private key here
+ssh_key_file = "~/.ssh/id_rsa"           # Required if not using password
+known_hosts_file = "./.ssh/knownhosts"    # Optional: path to your local known_hosts file
+
+# Remote deployment path
+deploy_directory = "/var/www/taurine"     # Where files will be uploaded on the server
+
+
+#############################################
+# Firewall (Optional)
+#############################################
 [firewall]
-allowed_inbound = [22, 443, 80]
-allowed_outbound = "all"
-block_ping = true
-rate_limit_ssh = true
-auto_configure_ufw = true
+allowed_inbound_ports = [22, 443, 80]     # Incoming traffic allowed (e.g. SSH, HTTPS, HTTP)
+allowed_outbound = "all"                  # Outgoing traffic rules
+block_icmp_ping = true                    # Block ping requests
+limit_ssh_rate = true                     # Basic protection against brute-force SSH attempts
+auto_configure = true                     # Automatically configure UFW with these rules
 
+
+#############################################
+# Reverse Proxy (Optional)
+#############################################
 [reverse_proxy]
 enabled = true
-type = "nginx"                 # or "traefik"
-domain = "taurine.example.com"
-auto_ssl = true                # Let's Encrypt + certbot
-redirect_http = true
+type = "nginx"                            # "nginx" or "traefik"
+domain = "taurine.example.com"           # Your application's public domain
+enable_https = true                       # Enable SSL via Let's Encrypt
+redirect_http_to_https = true             # Force HTTPS
 
+
+#############################################
+# Health Check (Optional)
+#############################################
 [healthcheck]
-health_check_path = "/health"
-health_status = 200
+path = "/health"                          # Endpoint to check for service health
+expected_status = 200                     # Expected HTTP status for healthy response
 
+
+#############################################
+# Environment Variables (Optional)
+#############################################
 [secrets]
-env_file_path = "./.env"
-remote_env_file_path = "~/.env"
+local_env_file = "./.env"                 # Path to your local environment variables file
+remote_env_file = "~/.env"                # Path to upload the env file on the server

@@ -1,4 +1,4 @@
-package ssh
+package internal
 
 import (
 	"fmt"
@@ -31,6 +31,9 @@ func TestPasswordAuth(t *testing.T) {
 		{name: "valid password login", password: taurinetesting.TestPassword, user: taurinetesting.TestUser, host: "127.0.0.1:3098", expectError: false},
 	}
 
+
+	c := &TaurineContext{}
+
 	tmpDir := t.TempDir()
 
 	tmpFilePath := tmpDir + "/known_hosts"
@@ -41,7 +44,7 @@ func TestPasswordAuth(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client, err := ConnectWithPassword(taurinetesting.TestUser, "127.0.0.1:3098", taurinetesting.TestPassword, tmpFilePath)
+			client, err := c.ConnectWithPassword(taurinetesting.TestUser, "127.0.0.1:3098", taurinetesting.TestPassword, tmpFilePath)
 			if tt.expectError && err == nil {
 				client.Close()
 				t.Fatal("failed to throw err")
@@ -70,6 +73,9 @@ func TestKeyAuth(t *testing.T) {
 
 	tmpDir := t.TempDir()
 
+	c := &TaurineContext{}
+
+
 	tmpFilePath := tmpDir + "/known_hosts"
 	err := os.WriteFile(tmpFilePath, []byte(`127.0.0.1:3098 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBWiHlrQ6HS7vytwfKb32R70waRKqJ9cZOWx8RDfm4HX`), 0644)
 	if err != nil {
@@ -78,7 +84,7 @@ func TestKeyAuth(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client, err := ConnectWithPrivateKey(taurinetesting.TestUser, "127.0.0.1:3098", []byte(taurinetesting.PrivateKeyPEM), tmpFilePath)
+			client, err := c.ConnectWithPrivateKey(taurinetesting.TestUser, "127.0.0.1:3098", []byte(taurinetesting.PrivateKeyPEM), tmpFilePath)
 			if tt.expectError && err == nil {
 				client.Close()
 				t.Fatal("failed to throw err")
@@ -105,6 +111,8 @@ func TestPasswordAutUnknownHost(t *testing.T) {
 	}{
 		{name: "valid password login", password: taurinetesting.TestPassword, user: taurinetesting.TestUser, host: "127.0.0.1:3098", expectError: false},
 	}
+	c := &TaurineContext{}
+
 
 	tmpDir := t.TempDir()
 
@@ -122,7 +130,7 @@ func TestPasswordAutUnknownHost(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client, err := ConnectWithPassword(taurinetesting.TestUser, "127.0.0.1:3098", taurinetesting.TestPassword, tmpFilePath)
+			client, err := c.ConnectWithPassword(taurinetesting.TestUser, "127.0.0.1:3098", taurinetesting.TestPassword, tmpFilePath)
 			if tt.expectError && err == nil {
 				client.Close()
 				t.Fatal("failed to throw err")
@@ -165,6 +173,8 @@ func TestKeyAuthUnknownHost(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	c := &TaurineContext{}
+
 	clean, err := taurinetesting.MockStdin(tmpDir+"rozz", "yes")
 	if err != nil {
 		t.Fatal(err)
@@ -173,7 +183,7 @@ func TestKeyAuthUnknownHost(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			client, err := ConnectWithPrivateKey(taurinetesting.TestUser, "127.0.0.1:3098", []byte(taurinetesting.PrivateKeyPEM), tmpFilePath)
+			client, err := c.ConnectWithPrivateKey(taurinetesting.TestUser, "127.0.0.1:3098", []byte(taurinetesting.PrivateKeyPEM), tmpFilePath)
 			if tt.expectError && err == nil {
 				client.Close()
 				t.Fatal("failed to throw err")

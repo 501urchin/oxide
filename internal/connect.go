@@ -1,4 +1,4 @@
-package ssh
+package internal
 
 import (
 	"fmt"
@@ -86,11 +86,11 @@ func connectSSH(user, host, knownHostsPath string, authMethod ssh.AuthMethod) (*
 	return client, err
 }
 
-func ConnectWithPassword(user, host, password, knownHostsPath string) (*ssh.Client, error) {
+func (t *TaurineContext) ConnectWithPassword(user, host, password, knownHostsPath string) (*ssh.Client, error) {
 	return connectSSH(user, host, knownHostsPath, ssh.Password(password))
 }
 
-func ConnectWithPrivateKey(user, host string, key []byte, knownHostsPath string) (*ssh.Client, error) {
+func (t *TaurineContext) ConnectWithPrivateKey(user, host string, key []byte, knownHostsPath string) (*ssh.Client, error) {
 	signer, err := ssh.ParsePrivateKey(key)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse private key: %v", err)
