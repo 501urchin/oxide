@@ -1,4 +1,4 @@
-module github.com/scott-mescudi/taurine
+module github.com/scott-mescudi/oxide
 
 go 1.24.2
 

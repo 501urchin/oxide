@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	taurinetesting "github.com/scott-mescudi/taurine/pkg/testing"
+	taurinetesting "github.com/scott-mescudi/oxide/pkg/testing"
 )
 
 func TestMain(m *testing.M) {
@@ -30,7 +30,6 @@ func TestPasswordAuth(t *testing.T) {
 	}{
 		{name: "valid password login", password: taurinetesting.TestPassword, user: taurinetesting.TestUser, host: "127.0.0.1:3098", expectError: false},
 	}
-
 
 	c := &TaurineContext{}
 
@@ -75,7 +74,6 @@ func TestKeyAuth(t *testing.T) {
 
 	c := &TaurineContext{}
 
-
 	tmpFilePath := tmpDir + "/known_hosts"
 	err := os.WriteFile(tmpFilePath, []byte(`127.0.0.1:3098 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBWiHlrQ6HS7vytwfKb32R70waRKqJ9cZOWx8RDfm4HX`), 0644)
 	if err != nil {
@@ -112,7 +110,6 @@ func TestPasswordAutUnknownHost(t *testing.T) {
 		{name: "valid password login", password: taurinetesting.TestPassword, user: taurinetesting.TestUser, host: "127.0.0.1:3098", expectError: false},
 	}
 	c := &TaurineContext{}
-
 
 	tmpDir := t.TempDir()
 
