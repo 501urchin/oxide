@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	taurinetesting "github.com/scott-mescudi/oxide/pkg/testing"
+	taurinetesting "github.com/501urchin/oxide/pkg/testing"
 )
 
 func TestMain(m *testing.M) {

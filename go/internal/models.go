@@ -6,8 +6,8 @@ import (
 	"os"
 	"sync"
 
+	"github.com/501urchin/oxide/pkg/models"
 	"github.com/BurntSushi/toml"
-	"github.com/scott-mescudi/oxide/pkg/models"
 )
 
 type TaurineContext struct {

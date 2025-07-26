@@ -1,4 +1,4 @@
-module github.com/scott-mescudi/oxide
+module github.com/501urchin/oxide
 
 go 1.24.2
 

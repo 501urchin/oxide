@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/501urchin/oxide/pkg/models"
 	"github.com/BurntSushi/toml"
-	"github.com/scott-mescudi/oxide/pkg/models"
 )
 
 func main() {

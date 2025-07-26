@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/scott-mescudi/oxide/pkg/input"
+	"github.com/501urchin/oxide/pkg/input"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/knownhosts"
 )
