@@ -21,16 +21,19 @@ void verifyKnownHost(ssh_session session) {
         }
 
         int state = ssh_session_is_known_server(session);
-        if (state == SSH_SERVER_NOT_KNOWN) {
+        if (state == SSH_SERVER_NOT_KNOWN || state == SSH_KNOWN_HOSTS_CHANGED || state == SSH_KNOWN_HOSTS_NOT_FOUND){
             std::string answer;
-            std::cout <<  "The server is unknown. Do you trust the host key (yes/no)?" << std::endl;
+            std::cout << "The server is unknown. Do you trust the host key (yes/no)?" << std::endl;
             ssh_print_hash(SSH_PUBLICKEY_HASH_SHA256, hash, hlen);
             std::cin >> answer;
 
-            if (answer == "yes" || answer == "y") {
+            if (answer == "yes" || answer == "y"){
                 ssh_session_update_known_hosts(session);
             }
+        }
 
+        if (state == SSH_KNOWN_HOSTS_OTHER) {
+            throw std::runtime_error("The host key for this server was not found but an other type of key exists. An attacker might change the default server key to confuse your client into thinking the key does not exist");
         }
 
     }catch(const std::exception& e) {
