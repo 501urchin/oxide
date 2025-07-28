@@ -1,0 +1,73 @@
+# --- C++ ---
+# Compiled object files
+*.o
+*.obj
+
+# Compiled static libraries
+*.lib
+*.a
+
+# Compiled dynamic libraries
+*.dll
+*.so
+*.dylib
+
+# Executable files
+*.exe
+*.out
+*.app
+*.run
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Build directories
+build/
+Build/
+bin/
+Bin/
+dist/
+out/
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+CTestTestfile.cmake
+install_manifest.txt
+
+# Code::Blocks
+*.layout
+*.depend
+*.cbp
+
+# Qt Creator
+*.pro.user*
+*.qbs.user*
+*.autosave
+
+# CLion
+.idea/
+cmake-build-*/
+
+# --- VSCode ---
+.vscode/
+.history/
+
+# VSCode C++ extension specific
+*.code-workspace
+
+# --- OS-specific ---
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Linux
+*~
