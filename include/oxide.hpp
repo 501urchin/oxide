@@ -5,8 +5,17 @@
 
 struct oxideContext {
     ssh_session session;
+    const std::string knownHostPath;
 
- 
-    void ConnectToServerViaPassword(const std::string& host, const std::string& name, const std::string& password) const;
-    void ConnectToServerViaKey(const std::string& host, const std::string& name, const std::string& key) const;
+    oxideContext(const std::string& knownHostPath)
+    : knownHostPath(knownHostPath){};
+
+    ~oxideContext() {
+        if (session != nullptr) {
+            ssh_free(session);
+        }
+    }
+    
+    void ConnectToServerViaPassword(const std::string& host, const std::string& username, const std::string& password) ;
+    void ConnectToServerViaKey(const std::string& host, const std::string& username, const std::string& key) ;
 };
