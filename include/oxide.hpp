@@ -27,4 +27,6 @@ struct oxideContext {
 
 
         void ConnectToServer(const std::string& host, const std::string& username, oxideSshAuthMethod authMethod, const std::string& auth);
+        template<typename... Args>
+        void Execute(const std::string& command, Args... args);
 }; 
