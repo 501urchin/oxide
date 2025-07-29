@@ -120,6 +120,7 @@ void oxideContext::ConnectToServer(const std::string& host, const std::string& u
         }else {
             throw std::runtime_error("invalid authMethod flag");
         }
+        
 
     }catch (const std::exception& e) {
         if (this->session != nullptr) {
@@ -129,6 +130,44 @@ void oxideContext::ConnectToServer(const std::string& host, const std::string& u
             ssh_free(this->session);
             this->session = nullptr;
         }
+        throw;
+    }
+}
+
+
+
+const std::string& oxideContext::Execute(const std::string& command) {
+    ssh_channel channel = ssh_channel_new(this->session);
+    if (channel == NULL) {
+        throw std::runtime_error("failed to open new ssh channel");
+    }
+
+    try {
+
+        int rc = ssh_channel_open_session(channel);
+        if (rc < 0) {
+            throw std::runtime_error("failed to open session on channel");
+        }
+
+        rc = ssh_channel_request_exec(channel, command.c_str());
+        if (rc != SSH_OK) {
+            throw std::runtime_error(std::format("failed to execute command '{}' on channel", command));
+        }
+
+
+        // next we need to read the output of the command 
+        // i think we can use this to do that but im not sure if this does what i want and idk how to dynamically allocate the needed buf
+        // also we need to decide how to return the result, as a cpp string or a c buf 
+        // rbytes = ssh_channel_read(channel, buffer, sizeof(buffer), 0);
+        // if (rbytes <= 0) {
+        //     goto failed;
+        // }
+
+
+    }catch(const std::exception& e) {
+        ssh_channel_send_eof(channel);
+        ssh_channel_close(channel);
+        ssh_channel_free(channel);
         throw;
     }
 }
