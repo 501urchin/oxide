@@ -77,5 +77,5 @@ func StartMockSSHServer(addr string) error {
 }
 
 func main() {
-	fmt.Println(StartMockSSHServer("127.0.0.1:8080"))
+	fmt.Println(StartMockSSHServer("127.0.0.1:22"))
 }

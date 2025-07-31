@@ -142,26 +142,34 @@ const std::string& oxideContext::Execute(const std::string& command) {
         throw std::runtime_error("failed to open new ssh channel");
     }
 
-    try {
+    char buf[1024];
+    static std::string result;
 
-        int rc = ssh_channel_open_session(channel);
-        if (rc < 0) {
-            throw std::runtime_error("failed to open session on channel");
+
+
+
+    try {
+        if (ssh_channel_open_session(channel) != SSH_OK) {
+            std::cout << ssh_get_error(this->session);
+            throw std::runtime_error(std::format("failed to open session on channel: {}", ssh_get_error(this->session)));
         }
 
-        rc = ssh_channel_request_exec(channel, command.c_str());
-        if (rc != SSH_OK) {
+        if (ssh_channel_request_exec(channel, command.c_str()) != SSH_OK) {
             throw std::runtime_error(std::format("failed to execute command '{}' on channel", command));
         }
 
 
-        // next we need to read the output of the command 
-        // i think we can use this to do that but im not sure if this does what i want and idk how to dynamically allocate the needed buf
-        // also we need to decide how to return the result, as a cpp string or a c buf 
-        // rbytes = ssh_channel_read(channel, buffer, sizeof(buffer), 0);
-        // if (rbytes <= 0) {
-        //     goto failed;
-        // }
+        int readB;
+        while ((readB = ssh_channel_read(channel, buf, sizeof(buf), 0)) > 0) {
+            result.append(buf, readB);
+        }
+
+
+        ssh_channel_send_eof(channel);
+        ssh_channel_close(channel);
+        ssh_channel_free(channel);
+
+        return result;
 
 
     }catch(const std::exception& e) {
